@@ -38,11 +38,24 @@ Web-based terrain visualization using Lantmäteriet's elevation data STAC API to
 pip install -r requirements.txt
 ```
 
-### Run
+### Run (Demo Mode - No Auth)
 ```bash
 python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
 # Open http://localhost:8000
+# Uses synthetic elevation data by default
 ```
+
+### Run with Real Lantmäteriet Data (Requires Auth)
+```bash
+# Set Lantmäteriet Basic Auth credentials
+set LANTMATERIET_USERNAME=your_username
+set LANTMATERIET_PASSWORD=your_password
+
+# Start server (now demo=false will work with real tiles)
+python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
+```
+
+Then in browser, remove `&demo=true` from the API call to fetch real DEM tiles.
 
 ### Use
 1. Click "Draw a rectangle" tool (top-left)
@@ -106,17 +119,29 @@ Currently using a simple PIL-based approach:
 - Export to GeoTIFF, COG
 - Streaming tiles for performance
 
-## Notes on Authentication
+## Authentication
 
-Lantmäteriet's STAC collection is **free and open** (CC-BY-4.0), but the tile download URLs require registration:
-- Register at https://www.lantmateriet.se/
-- Request API access (free tier available)
-- URLs are per-user authenticated
+### Getting Credentials
+Lantmäteriet's STAC collection is **free and open** (CC-BY-4.0), but tile downloads require **Basic Auth**:
+1. Register account at https://www.lantmateriet.se/
+2. Receive username/password
+3. Set environment variables before starting server:
+   ```bash
+   export LANTMATERIET_USERNAME=your_username
+   export LANTMATERIET_PASSWORD=your_password
+   ```
 
-For production, consider:
+### Using Credentials
+Once set, the backend automatically sends Basic Auth headers to both:
+- STAC API queries (`https://api.lantmateriet.se/stac-hojd/v1/`)
+- Tile downloads (`https://dl1.lantmateriet.se/hojd/data/...`)
+
+In the frontend, change `&demo=true` to `&demo=false` in the API call to use real data.
+
+### For Production
 - Tile mirroring/caching to avoid auth throttling
 - CloudFront or similar CDN for public tiles
-- Server-side credential storage (API key per request)
+- Server-side credential storage (avoid exposing in client)
 
 ## File Structure
 ```
