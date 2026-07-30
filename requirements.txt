@@ -1,5 +1,7 @@
-fastapi==0.104.1
+fastapi>=0.109.1
 uvicorn==0.24.0
 httpx==0.25.1
 pillow==10.1.0
-python-multipart==0.0.6
+python-multipart>=0.0.7
+streamlit==1.60.0
+pydeck==0.9.3
